@@ -28,30 +28,12 @@ impl Renderer {
         Ok(Renderer { canvas, padding_x, padding_y, cell_width, cell_height })
     }
 
-    fn draw_cell(&mut self, cell: &Cell, is_current_cell: bool) {
+    fn draw_borders(&mut self, cell: &Cell) {
         let x = i32::from(cell.x) * self.cell_width + self.padding_x;
         let y = i32::from(cell.y) * self.cell_height + self.padding_y;
         let cell_w = self.cell_width;
         let cell_h = self.cell_height;
-        
-        if cell.visited {
-            self.canvas.set_draw_color(Color::RGB(128,0,128));
-            self.canvas.fill_rect(Rect::new(
-                i32::from(x),
-                i32::from(y),
-                self.cell_width as u32,
-                self.cell_height as u32,
-            )).unwrap();
-        }
-        if is_current_cell {
-            self.canvas.set_draw_color(Color::RGB(0, 128,128));
-            self.canvas.fill_rect(Rect::new(
-                i32::from(x),
-                i32::from(y),
-                self.cell_width as u32,
-                self.cell_height as u32,
-            )).unwrap();
-        }
+
         self.canvas.set_draw_color(Color::BLACK);
 
         if cell.walls[0] { // top wall
@@ -71,12 +53,56 @@ impl Renderer {
         }
     }
 
+    fn draw_cell(&mut self, cell: &Cell, is_current_cell: bool) {
+        let x = i32::from(cell.x) * self.cell_width + self.padding_x;
+        let y = i32::from(cell.y) * self.cell_height + self.padding_y;
+        
+        if cell.visited != 0 {
+            self.canvas.set_draw_color(Color::RGB(128,0,128));
+            self.canvas.fill_rect(Rect::new(
+                i32::from(x),
+                i32::from(y),
+                self.cell_width as u32,
+                self.cell_height as u32,
+            )).unwrap();
+        }
+        if is_current_cell {
+            self.canvas.set_draw_color(Color::RGB(0, 128,128));
+            self.canvas.fill_rect(Rect::new(
+                i32::from(x),
+                i32::from(y),
+                self.cell_width as u32,
+                self.cell_height as u32,
+            )).unwrap();
+        }
+        self.draw_borders(cell);
+    }
+
+    fn draw_cell_path(&mut self, cell: &Cell) {
+        let x = i32::from(cell.x) * self.cell_width + self.padding_x;
+        let y = i32::from(cell.y) * self.cell_height + self.padding_y;
+        self.canvas.set_draw_color(Color::RED);
+            self.canvas.fill_rect(Rect::new(
+                i32::from(x),
+                i32::from(y),
+                self.cell_width as u32,
+                self.cell_height as u32,
+            )).unwrap();
+        self.draw_borders(cell);
+    }
+
     fn draw_maze(&mut self, maze: &Maze) -> Result<(), String> {
         let n: u16 = maze.width as u16 * maze.height as u16;
         self.canvas.set_draw_color(Color::BLACK);
         for i in 0..n {
             let cell = &maze.grid[usize::from(i)];
-            self.draw_cell(cell, i == maze.current_cell_index as u16);
+            self.draw_cell(cell, (maze.is_generating || maze.is_solving) && i == maze.current_cell_index as u16);
+        }
+        if !maze.is_generating {
+            for i in 0..maze.stack.len() {
+                let index = maze.stack[usize::from(i)];
+                self.draw_cell_path(&maze.grid[index])
+            }
         }
         Ok(())
     }

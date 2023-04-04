@@ -8,8 +8,8 @@ mod maze;
 const WINDOW_WITH   : u32 = 800;
 const WINDOW_HEIGHT : u32 = 800;
 
-const MAZE_COLS     : u8  = 30;
-const MAZE_ROWS     : u8  = 30;
+const MAZE_COLS     : u8  = 50;
+const MAZE_ROWS     : u8  = 50;
 
 fn main() {
     println!("Starting the maze solver...");
@@ -49,7 +49,7 @@ fn main() {
         current_frame += 1;
         if current_frame > speed_rate {
             current_frame = 0;
-            maze.generate_maze();
+            maze.update();
         }
         
         renderer.draw(&maze).unwrap();

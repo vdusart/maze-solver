@@ -4,31 +4,33 @@ pub struct Maze {
     pub width: u8,
     pub height: u8,
     pub grid: Vec<Cell>,
-    stack: Vec<usize>,
-    pub current_cell_index: usize
+    pub stack: Vec<usize>,
+    pub current_cell_index: usize,
+    pub is_generating: bool,
+    pub is_solving: bool
 }
 
 impl Maze {
 
 
-    fn get_unvisited_neighbors(&mut self, index: usize) -> Vec<usize> {
+    fn get_neighbors(&mut self, index: usize) -> Vec<usize> {
         let mut neighbors: Vec<usize> = Vec::new();
         let w = usize::from(self.width);
         let h = usize::from(self.height);
 
-        if index > w && !self.grid[index - w].visited {
+        if index > w {
             neighbors.push(index - w); // add top neighbor
         }
 
-        if index % w != w - 1 && !self.grid[index + 1].visited {
+        if index % w != w - 1 {
             neighbors.push(index + 1); // add right neighbor
         }
 
-        if index < w * (h - 1) && !self.grid[index + w].visited {
+        if index < w * (h - 1) {
             neighbors.push(index + w); // add bottom neighbor
         }
 
-        if index % w != 0 && !self.grid[index - 1].visited {
+        if index % w != 0 {
             neighbors.push(index - 1); // add left neighbor
         }
 
@@ -60,25 +62,78 @@ impl Maze {
         }
     }
 
-    pub fn generate_maze(&mut self) {
+    fn generate(&mut self) {
         let mut rng = rand::thread_rng();
 
         let current = &mut self.grid[self.current_cell_index];
-        current.visited = true;
-        let neighbors = self.get_unvisited_neighbors(self.current_cell_index);
+        current.visited = 1;
+        let neighbors = self.get_neighbors(self.current_cell_index);
+        let unvisited_neighbors: Vec<usize> = neighbors.into_iter()
+            .filter(|n| self.grid[*n].visited == 0).collect();
 
-        if neighbors.len() > 0 {
-            let next_cell_index = neighbors[rng.gen_range(0..neighbors.len())];
+        if unvisited_neighbors.len() > 0 {
+            let next_cell_index = unvisited_neighbors[rng.gen_range(0..unvisited_neighbors.len())];
 
             self.stack.push(self.current_cell_index);
 
             self.remove_walls(self.current_cell_index, next_cell_index);
 
-            self.grid[next_cell_index].visited = true;
+            self.grid[next_cell_index].visited = 1;
             self.current_cell_index = next_cell_index;
         } else if self.stack.len() > 0{
             let next_cell_index = self.stack.pop().unwrap();
             self.current_cell_index = next_cell_index;
+        }
+    }
+
+    fn is_possible_neighbor(&mut self, n: usize) -> bool {
+        let mov = n as i32 - self.current_cell_index as i32;
+        let is_wall = match mov {
+            -1 => self.grid[self.current_cell_index].walls[3],
+            1 => self.grid[self.current_cell_index].walls[1],
+            _ if mov == self.width as i32 => self.grid[self.current_cell_index].walls[2],
+            _ if mov == -1 * self.width as i32 => self.grid[self.current_cell_index].walls[0],
+            _ => {
+                panic!("Impossible neighbor choice");
+            }
+        };
+        !is_wall && self.grid[n].visited == 1
+    }
+
+    fn solve(&mut self) {
+        let mut rng = rand::thread_rng();
+        let neighbors = self.get_neighbors(self.current_cell_index);
+        let possible_neighbors: Vec<usize> = neighbors.into_iter()
+            .filter(|n| self.is_possible_neighbor(*n)).collect();
+
+        self.grid[self.current_cell_index].visited = 2;
+        if possible_neighbors.len() > 0 {
+            let next_cell_index = possible_neighbors[rng.gen_range(0..possible_neighbors.len())];
+
+            self.stack.push(self.current_cell_index);
+
+            self.grid[next_cell_index].visited = 2;
+            self.current_cell_index = next_cell_index;
+        } else if self.stack.len() > 0{
+            let next_cell_index = self.stack.pop().unwrap();
+            self.current_cell_index = next_cell_index;
+        }
+        
+    }
+
+    pub fn update(&mut self) {
+        if self.is_generating {
+            self.generate();
+            if self.current_cell_index == 0 && self.grid[0].visited == 1 {
+                self.is_generating = false;
+                self.is_solving = true;
+            }
+        } else if self.is_solving {
+            self.solve();
+            if self.current_cell_index as u16 == self.width as u16 * self.height as u16 - 1 {
+                self.is_solving = false;
+                self.stack.push(self.current_cell_index);
+            }
         }
     }
 
@@ -93,7 +148,7 @@ impl Maze {
             }
         }
 
-        Ok(Maze { width, height, grid, stack, current_cell_index })
+        Ok(Maze { width, height, grid, stack, current_cell_index, is_generating: true, is_solving: false })
     }
 }
 
@@ -101,13 +156,13 @@ pub struct Cell {
     pub x: u8,
     pub y: u8,
     pub walls: [bool; 4],
-    pub visited: bool
+    pub visited: u8
 }
 
 impl Cell {
     pub fn new(x: u8, y: u8) -> Cell {
         let walls = [true; 4];
-        let visited = false;
+        let visited = 0;
         Cell { x, y, walls, visited }
     }
 }
