@@ -40,7 +40,7 @@ fn main() {
                 Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
                     break 'running;
                 },
-                Event::KeyDown { keycode: Some(Keycode::KpEnter), .. } => {
+                Event::KeyDown { keycode: Some(Keycode::R), .. } => {
                     maze = maze::Maze::new(MAZE_COLS, MAZE_ROWS).unwrap()
                 },
                 _ => {}
