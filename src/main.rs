@@ -3,6 +3,7 @@ use sdl2::keyboard::Keycode;
 use std::time::Duration;
 
 mod renderer;
+mod maze;
 
 fn main() {
     println!("Starting the maze solver");
@@ -15,8 +16,9 @@ fn main() {
         .build()
         .unwrap();
 
-    let mut renderer = renderer::Renderer::new(window).unwrap();
+    let maze = maze::Maze::new(10, 10).unwrap();
 
+    let mut renderer = renderer::Renderer::new(window, maze).unwrap();
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
