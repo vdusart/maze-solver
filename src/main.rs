@@ -11,12 +11,12 @@ fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
 
-    let window = video_subsystem.window("Maze Generator", 800, 600)
+    let window = video_subsystem.window("Maze Generator", 800, 800)
         .position_centered()
         .build()
         .unwrap();
 
-    let maze = maze::Maze::new(10, 10).unwrap();
+    let maze = maze::Maze::new(50, 20).unwrap();
 
     let mut renderer = renderer::Renderer::new(window, maze).unwrap();
 

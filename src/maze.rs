@@ -1,24 +1,22 @@
 pub struct Maze {
-    pub width: usize,
-    pub height: usize,
+    pub width: u8,
+    pub height: u8,
     pub grid: Vec<Vec<bool>>
 }
 
 impl Maze {
 
-    pub fn new(width: usize, height: usize) -> Result<Maze, String> {
-        let grid = vec![vec![false; width]; height];
+    pub fn new(width: u8, height: u8) -> Result<Maze, String> {
+        let grid = vec![vec![false; width.into()]; height.into()];
 
         Ok(Maze { width, height, grid })
     }
 
-    pub fn get_square(&mut self, x: usize, y: usize) -> Result<bool, String> {
+    pub fn get_cell(&mut self, x: u8, y: u8) -> Result<bool, String> {
         if x >= self.width || y >= self.height {
-            return Err(String::from("'get_square': out of bounds"));
+            return Err(String::from("'get_cell': out of bounds"));
         }
-        let square_value = self.grid
-            .get(x).unwrap()
-            .get(y).unwrap();
-        Ok(*square_value)
+        let cell_value = self.grid[usize::from(x)][usize::from(y)];
+        Ok(cell_value)
     }
 }
