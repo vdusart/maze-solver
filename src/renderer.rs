@@ -1,9 +1,9 @@
-use sdl2::rect::{Rect, Point};
+use sdl2::rect::Point;
 use sdl2::video::Window;
 use sdl2::pixels::Color;
 use sdl2::render::WindowCanvas;
 
-use crate::maze::{Maze, Cell};
+use crate::maze::Maze;
 
 pub struct Renderer {
     canvas: WindowCanvas,
