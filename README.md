@@ -1,6 +1,6 @@
 # Maze Generator and Solver
 
-This is a small project done in 1 day to continue my journey through learning Rust.
+This is a small project made to continue my journey through learning Rust.
 
 ## Usage
 
