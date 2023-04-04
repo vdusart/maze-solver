@@ -4,6 +4,7 @@ pub struct Maze {
     pub width: u8,
     pub height: u8,
     pub grid: Vec<Cell>,
+    stack: Vec<usize>,
     pub current_cell_index: usize
 }
 
@@ -45,11 +46,11 @@ impl Maze {
                 self.grid[current].walls[1] = false;
                 self.grid[next].walls[3] = false;
             }
-            _ if mov == self.height as i32 => {
+            _ if mov == self.width as i32 => {
                 self.grid[current].walls[2] = false;
                 self.grid[next].walls[0] = false;
             }
-            _ if mov == -1 * self.height as i32 => {
+            _ if mov == -1 * self.width as i32 => {
                 self.grid[current].walls[0] = false;
                 self.grid[next].walls[2] = false;
             }
@@ -65,19 +66,25 @@ impl Maze {
         let current = &mut self.grid[self.current_cell_index];
         current.visited = true;
         let neighbors = self.get_unvisited_neighbors(self.current_cell_index);
-        println!("------");
 
         if neighbors.len() > 0 {
-            let next = neighbors[rng.gen_range(0..neighbors.len())];
-             self.remove_walls(self.current_cell_index, next);
+            let next_cell_index = neighbors[rng.gen_range(0..neighbors.len())];
 
-            self.grid[next].visited = true;
-            self.current_cell_index = next;
+            self.stack.push(self.current_cell_index);
+
+            self.remove_walls(self.current_cell_index, next_cell_index);
+
+            self.grid[next_cell_index].visited = true;
+            self.current_cell_index = next_cell_index;
+        } else if self.stack.len() > 0{
+            let next_cell_index = self.stack.pop().unwrap();
+            self.current_cell_index = next_cell_index;
         }
     }
 
     pub fn new(width: u8, height: u8) -> Result<Maze, String> {
         let mut grid: Vec<Cell> = vec![];
+        let stack: Vec<usize> = vec![];
         let current_cell_index = 0;
 
         for y in 0..height {
@@ -86,7 +93,7 @@ impl Maze {
             }
         }
 
-        Ok(Maze { width, height, grid, current_cell_index })
+        Ok(Maze { width, height, grid, stack, current_cell_index })
     }
 }
 

@@ -8,11 +8,11 @@ mod maze;
 const WINDOW_WITH   : u32 = 800;
 const WINDOW_HEIGHT : u32 = 800;
 
-const MAZE_COLS     : u8  = 10;
-const MAZE_ROWS     : u8  = 10;
+const MAZE_COLS     : u8  = 30;
+const MAZE_ROWS     : u8  = 30;
 
 fn main() {
-    println!("Starting the maze solver");
+    println!("Starting the maze solver...");
 
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
@@ -28,7 +28,7 @@ fn main() {
 
     let mut event_pump = sdl_context.event_pump().unwrap();
     
-    let generate_frame = 50;
+    let speed_rate = 0;
     let mut current_frame = 0;
 
     'running: loop {
@@ -47,7 +47,7 @@ fn main() {
             }
         }
         current_frame += 1;
-        if current_frame > generate_frame {
+        if current_frame > speed_rate {
             current_frame = 0;
             maze.generate_maze();
         }

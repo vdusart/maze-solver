@@ -7,7 +7,8 @@ use crate::maze::{Maze, Cell};
 
 pub struct Renderer {
     canvas: WindowCanvas,
-    padding: i32,
+    padding_x: i32,
+    padding_y: i32,
     cell_width: i32,
     cell_height: i32
 }
@@ -15,19 +16,21 @@ pub struct Renderer {
 impl Renderer {
     
     pub fn new(window: Window, maze_width: i32, maze_height: i32) -> Result<Renderer, String> {
+        let goal_padding: i32 = 10;
         let size = window.size();
         let canvas = window.into_canvas().build().unwrap();
-        let padding: i32 = 10;
         let win_width = size.0 as i32;
         let win_height = size.1 as i32;
-        let cell_width = (win_width - 2 * padding) / maze_width;
-        let cell_height = (win_height - 2 * padding) / maze_height;
-        Ok(Renderer { canvas, padding, cell_width, cell_height })
+        let cell_width = (win_width - 2 * goal_padding) / maze_width;
+        let cell_height = (win_height - 2 * goal_padding) / maze_height;
+        let padding_x = (win_width - cell_width * maze_width) / 2;
+        let padding_y = (win_height - cell_height * maze_height) / 2;
+        Ok(Renderer { canvas, padding_x, padding_y, cell_width, cell_height })
     }
 
     fn draw_cell(&mut self, cell: &Cell, is_current_cell: bool) {
-        let x = i32::from(cell.x) * self.cell_width + self.padding;
-        let y = i32::from(cell.y) * self.cell_height + self.padding;
+        let x = i32::from(cell.x) * self.cell_width + self.padding_x;
+        let y = i32::from(cell.y) * self.cell_height + self.padding_y;
         let cell_w = self.cell_width;
         let cell_h = self.cell_height;
         
