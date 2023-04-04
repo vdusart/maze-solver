@@ -16,7 +16,7 @@ fn main() {
         .build()
         .unwrap();
 
-    let maze = maze::Maze::new(50, 20).unwrap();
+    let maze = maze::Maze::new(20, 20).unwrap();
 
     let mut renderer = renderer::Renderer::new(window, maze).unwrap();
 
