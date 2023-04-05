@@ -8,4 +8,4 @@ This is a small project made to continue my journey through learning Rust.
 
 Lauch the script with `cargo run`.
 
-Once it's done you can restart the generation of the maze by entering the letter `R` on your keyboard.
+Once it's done you can restart the generation of the maze by entering the letter `R` on your keyboard, to speed up the process you can press `S`.
