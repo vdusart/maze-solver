@@ -8,8 +8,8 @@ mod maze;
 const WINDOW_WITH   : u32 = 800;
 const WINDOW_HEIGHT : u32 = 800;
 
-const MAZE_COLS     : u8  = 50;
-const MAZE_ROWS     : u8  = 50;
+const MAZE_COLS     : u8  = 20;
+const MAZE_ROWS     : u8  = 20;
 
 fn main() {
     println!("Starting the maze solver...");
@@ -30,6 +30,7 @@ fn main() {
     
     let speed_rate = 0;
     let mut current_frame = 0;
+    let mut speed_up = false;
 
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -43,13 +44,17 @@ fn main() {
                 Event::KeyDown { keycode: Some(Keycode::R), .. } => {
                     maze = maze::Maze::new(MAZE_COLS, MAZE_ROWS).unwrap()
                 },
+                Event::KeyDown { keycode: Some(Keycode::S), .. } => {
+                    speed_up = true;
+                },
                 _ => {}
             }
         }
         current_frame += 1;
-        if current_frame > speed_rate {
+        if speed_up || current_frame > speed_rate {
             current_frame = 0;
-            maze.update();
+            maze.update(speed_up);
+            speed_up = false;
         }
         
         renderer.draw(&maze).unwrap();

@@ -28,9 +28,14 @@ impl Renderer {
         Ok(Renderer { canvas, padding_x, padding_y, cell_width, cell_height })
     }
 
-    fn draw_borders(&mut self, cell: &Cell) {
+    fn drawing_cell_position(&mut self, cell: &Cell) -> (i32, i32) {
         let x = i32::from(cell.x) * self.cell_width + self.padding_x;
         let y = i32::from(cell.y) * self.cell_height + self.padding_y;
+        (x, y)
+    }
+
+    fn draw_borders(&mut self, cell: &Cell) {
+        let (x, y) = self.drawing_cell_position(cell);
         let cell_w = self.cell_width;
         let cell_h = self.cell_height;
 
@@ -54,8 +59,7 @@ impl Renderer {
     }
 
     fn draw_cell(&mut self, cell: &Cell, is_current_cell: bool) {
-        let x = i32::from(cell.x) * self.cell_width + self.padding_x;
-        let y = i32::from(cell.y) * self.cell_height + self.padding_y;
+        let (x, y) = self.drawing_cell_position(cell);
         
         if cell.visited != 0 {
             self.canvas.set_draw_color(Color::RGB(128,0,128));
@@ -79,8 +83,7 @@ impl Renderer {
     }
 
     fn draw_cell_path(&mut self, cell: &Cell) {
-        let x = i32::from(cell.x) * self.cell_width + self.padding_x;
-        let y = i32::from(cell.y) * self.cell_height + self.padding_y;
+        let (x, y) = self.drawing_cell_position(cell);
         self.canvas.set_draw_color(Color::RED);
             self.canvas.fill_rect(Rect::new(
                 i32::from(x),
@@ -98,6 +101,10 @@ impl Renderer {
             let cell = &maze.grid[usize::from(i)];
             self.draw_cell(cell, (maze.is_generating || maze.is_solving) && i == maze.current_cell_index as u16);
         }
+        Ok(())
+    }
+
+    fn draw_path(&mut self, maze: &Maze) -> Result<(), String> {
         if !maze.is_generating {
             for i in 0..maze.stack.len() {
                 let index = maze.stack[usize::from(i)];
@@ -112,6 +119,7 @@ impl Renderer {
         self.canvas.clear();
 
         self.draw_maze(maze)?;
+        self.draw_path(maze)?;
 
         self.canvas.present();
         Ok(())

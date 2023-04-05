@@ -12,7 +12,6 @@ pub struct Maze {
 
 impl Maze {
 
-
     fn get_neighbors(&mut self, index: usize) -> Vec<usize> {
         let mut neighbors: Vec<usize> = Vec::new();
         let w = usize::from(self.width);
@@ -68,8 +67,10 @@ impl Maze {
         let current = &mut self.grid[self.current_cell_index];
         current.visited = 1;
         let neighbors = self.get_neighbors(self.current_cell_index);
-        let unvisited_neighbors: Vec<usize> = neighbors.into_iter()
-            .filter(|n| self.grid[*n].visited == 0).collect();
+        let unvisited_neighbors: Vec<usize> = neighbors
+            .into_iter()
+            .filter(|n| self.grid[*n].visited == 0)
+            .collect();
 
         if unvisited_neighbors.len() > 0 {
             let next_cell_index = unvisited_neighbors[rng.gen_range(0..unvisited_neighbors.len())];
@@ -83,6 +84,9 @@ impl Maze {
         } else if self.stack.len() > 0{
             let next_cell_index = self.stack.pop().unwrap();
             self.current_cell_index = next_cell_index;
+        } else {
+            self.is_generating = false;
+            self.is_solving = true;
         }
     }
 
@@ -103,8 +107,10 @@ impl Maze {
     fn solve(&mut self) {
         let mut rng = rand::thread_rng();
         let neighbors = self.get_neighbors(self.current_cell_index);
-        let possible_neighbors: Vec<usize> = neighbors.into_iter()
-            .filter(|n| self.is_possible_neighbor(*n)).collect();
+        let possible_neighbors: Vec<usize> = neighbors
+            .into_iter()
+            .filter(|n| self.is_possible_neighbor(*n))
+            .collect();
 
         self.grid[self.current_cell_index].visited = 2;
         if possible_neighbors.len() > 0 {
@@ -121,18 +127,24 @@ impl Maze {
         
     }
 
-    pub fn update(&mut self) {
+    pub fn update(&mut self, speed_up: bool) {
         if self.is_generating {
-            self.generate();
-            if self.current_cell_index == 0 && self.grid[0].visited == 1 {
-                self.is_generating = false;
-                self.is_solving = true;
+            loop {
+                self.generate();
+                if !speed_up || !self.is_generating {
+                    break;
+                }
             }
         } else if self.is_solving {
-            self.solve();
-            if self.current_cell_index as u16 == self.width as u16 * self.height as u16 - 1 {
-                self.is_solving = false;
-                self.stack.push(self.current_cell_index);
+            loop {
+                self.solve();
+                if self.current_cell_index as u16 == self.width as u16 * self.height as u16 - 1 {
+                    self.is_solving = false;
+                    self.stack.push(self.current_cell_index);
+                }
+                if !speed_up || !self.is_solving {
+                    break;
+                } 
             }
         }
     }
@@ -140,7 +152,6 @@ impl Maze {
     pub fn new(width: u8, height: u8) -> Result<Maze, String> {
         let mut grid: Vec<Cell> = vec![];
         let stack: Vec<usize> = vec![];
-        let current_cell_index = 0;
 
         for y in 0..height {
             for x in 0..width {
@@ -148,7 +159,7 @@ impl Maze {
             }
         }
 
-        Ok(Maze { width, height, grid, stack, current_cell_index, is_generating: true, is_solving: false })
+        Ok(Maze { width, height, grid, stack, current_cell_index: 0, is_generating: true, is_solving: false })
     }
 }
 
@@ -162,7 +173,6 @@ pub struct Cell {
 impl Cell {
     pub fn new(x: u8, y: u8) -> Cell {
         let walls = [true; 4];
-        let visited = 0;
-        Cell { x, y, walls, visited }
+        Cell { x, y, walls, visited: 0 }
     }
 }
